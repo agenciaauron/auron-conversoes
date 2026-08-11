@@ -3,179 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Auron Conversões</title>
+  <title>Auron Marketing</title>
+  <meta name="description" content="Auron Marketing é uma agência de marketing digital de Londrina, Paraná, especializada em tráfego pago, redes sociais, sites, landing pages e criativos.">
   <style>
-    :root{
-      --purple:#541285;
-      --purple2:#6e24a5;
-      --bg:#f6f5f8;
-      --card:#fff;
-      --text:#17151a;
-      --muted:#716b78;
-      --border:#e8e4eb;
-      --green:#16794b;
-      --greenbg:#eaf8f1;
-      --amber:#8a5b00;
-      --amberbg:#fff6db;
-      --red:#b42318;
-      --redbg:#fff0ee;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    button,input{font:inherit}
-    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-    .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:19px}
-    .brandmark{width:34px;height:34px;border-radius:10px;background:var(--purple);display:grid;place-items:center;color:#fff;font-weight:900}
-    .container{max-width:1280px;margin:0 auto;padding:30px 24px 60px}
-    .hero{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:24px}
-    h1{font-size:30px;margin:0 0 6px}.subtitle{margin:0;color:var(--muted)}
-    .btn{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}
-    .btn-primary{background:var(--purple);color:#fff}.btn-primary:hover{background:var(--purple2)}
-    .btn-light{background:#f1edf4;color:var(--purple)}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-    .metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}.metric small{color:var(--muted);display:block;margin-bottom:8px}.metric strong{font-size:25px}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .panel-head{padding:17px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
-    .panel-head strong{font-size:17px}.search{width:280px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;outline:none}.search:focus{border-color:#b89acb}
-    .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1050px}th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:#fbfafc}td{font-size:14px}.name{font-weight:750}.phone{color:var(--muted);font-size:12px;margin-top:3px}.message{max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#4c4651}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:750}.green{background:var(--greenbg);color:var(--green)}.amber{background:var(--amberbg);color:var(--amber)}.gray{background:#f0eef2;color:#655f6c}.red{background:var(--redbg);color:var(--red)}
-    .empty{padding:55px;text-align:center;color:var(--muted)}
-    .login{position:fixed;inset:0;background:rgba(20,12,27,.72);display:grid;place-items:center;z-index:100;padding:20px}.login-card{background:#fff;width:min(420px,100%);border-radius:18px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.25)}.login-card h2{margin:0 0 8px}.login-card p{color:var(--muted);margin:0 0 18px}.login-card input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:12px;outline:none}.error{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}.hidden{display:none!important}.loading{opacity:.55;pointer-events:none}
-    .toast{position:fixed;right:22px;bottom:22px;background:#1e1a21;color:#fff;padding:13px 16px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.2);z-index:120;max-width:380px}
-    @media(max-width:800px){.metrics{grid-template-columns:repeat(2,1fr)}.hero{align-items:start;flex-direction:column}.search{width:100%}.panel-head{align-items:stretch;flex-direction:column}.topbar{padding:15px 18px}.container{padding:22px 14px 50px}}
+    :root{--purple:#541285;--text:#17151a;--muted:#6f6876;--bg:#f7f5f9;--card:#fff;--border:#e7e1eb}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}a{color:var(--purple);text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:1040px;margin:0 auto;padding:0 24px}.top{background:#fff;border-bottom:1px solid var(--border)}.top .wrap{height:76px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:20px}.mark{width:36px;height:36px;border-radius:10px;background:var(--purple);color:#fff;display:grid;place-items:center;font-weight:900}.nav{font-size:14px;color:var(--muted)}.hero{padding:78px 0 52px}.eyebrow{color:var(--purple);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.08em}h1{font-size:48px;line-height:1.05;margin:12px 0 18px;max-width:760px}.lead{font-size:19px;line-height:1.65;color:var(--muted);max-width:760px}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;padding-bottom:70px}.card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:28px}.card h2{margin:0 0 14px;font-size:22px}.card p{color:var(--muted);line-height:1.65}.services{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}.service{border:1px solid var(--border);border-radius:12px;padding:15px;font-weight:700;background:#fcfbfd}.info{display:grid;gap:14px}.label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px}.value{font-weight:700;line-height:1.45}.footer{border-top:1px solid var(--border);background:#fff;padding:26px 0;color:var(--muted);font-size:13px}.footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}@media(max-width:760px){h1{font-size:36px}.grid{grid-template-columns:1fr}.services{grid-template-columns:1fr}.hero{padding-top:55px}.nav{display:none}}
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="brand"><div class="brandmark">A</div>Auron Conversões</div>
-    <button id="logout" class="btn btn-light hidden">Sair</button>
-  </div>
-
-  <main class="container">
-    <div class="hero">
-      <div><h1>Conversões do WhatsApp</h1><p class="subtitle">Veja os leads vindos das conversas e envie compras reais para a Meta.</p></div>
-      <button id="refresh" class="btn btn-light">Atualizar</button>
-    </div>
-
-    <section class="metrics">
-      <div class="metric"><small>Total de leads</small><strong id="mLeads">0</strong></div>
-      <div class="metric"><small>Vindos de anúncio</small><strong id="mAds">0</strong></div>
-      <div class="metric"><small>Compras enviadas</small><strong id="mPurchases">0</strong></div>
-      <div class="metric"><small>Valor registrado</small><strong id="mRevenue">R$ 0,00</strong></div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head"><strong>Leads recentes</strong><input id="search" class="search" placeholder="Buscar nome ou telefone"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Cliente</th><th>Última mensagem</th><th>Origem</th><th>Status</th><th>Último contato</th><th>Ação</th></tr></thead>
-          <tbody id="rows"></tbody>
-        </table>
-        <div id="empty" class="empty hidden">Nenhum lead encontrado.</div>
-      </div>
-    </section>
+  <header class="top"><div class="wrap"><div class="brand"><div class="mark">A</div>Auron Marketing</div><div class="nav">Londrina, Paraná</div></div></header>
+  <main class="wrap">
+    <section class="hero"><div class="eyebrow">Marketing digital</div><h1>Estratégia, anúncios e presença digital para empresas.</h1><p class="lead">A Auron Marketing atua no desenvolvimento e gerenciamento de soluções de marketing digital, incluindo mídia paga, redes sociais, páginas, sites e materiais criativos para empresas.</p></section>
+    <section class="grid"><article class="card"><h2>Serviços</h2><p>Planejamos e executamos ações digitais com foco em comunicação, geração de oportunidades e presença online.</p><div class="services"><div class="service">Tráfego pago</div><div class="service">Social Media</div><div class="service">Sites e Landing Pages</div><div class="service">Criativos digitais</div></div></article><aside class="card"><h2>Dados da empresa</h2><div class="info"><div><div class="label">Razão social</div><div class="value">AURON MARKETING LTDA</div></div><div><div class="label">Nome fantasia</div><div class="value">AURON</div></div><div><div class="label">CNPJ</div><div class="value">64.679.952/0001-66</div></div><div><div class="label">Endereço</div><div class="value">Rua Sargento Chagas, 323<br>San Remo, Londrina - PR<br>CEP 86062-290</div></div><div><div class="label">Telefone</div><div class="value">(43) 99654-8883</div></div><div><div class="label">E-mail</div><div class="value">auronmarketingltda@gmail.com</div></div></div></aside></section>
   </main>
-
-  <div id="login" class="login">
-    <form id="loginForm" class="login-card">
-      <h2>Acessar painel</h2>
-      <p>Digite a senha interna do Auron Conversões.</p>
-      <input id="password" type="password" autocomplete="current-password" placeholder="Senha do painel" required>
-      <button class="btn btn-primary" style="width:100%">Entrar</button>
-      <div id="loginError" class="error"></div>
-    </form>
-  </div>
-  <div id="toast" class="toast hidden"></div>
-
-<script>
-  let leads = [];
-  const $ = (id) => document.getElementById(id);
-  const keyName = "auron_dashboard_key";
-
-  function money(value){ return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(value||0)); }
-  function dateTime(value){ if(!value) return "—"; return new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value)); }
-  function toast(message){ $("toast").textContent=message; $("toast").classList.remove("hidden"); setTimeout(()=>$("toast").classList.add("hidden"),4000); }
-  function authKey(){ return sessionStorage.getItem(keyName)||""; }
-
-  async function api(url, options={}){
-    const headers = {"x-auron-key":authKey(), ...(options.headers||{})};
-    if(options.body) headers["Content-Type"]="application/json";
-    const res = await fetch(url,{...options,headers});
-    let data={}; try{data=await res.json()}catch{}
-    if(res.status===401){ sessionStorage.removeItem(keyName); showLogin(); throw new Error("Senha inválida"); }
-    if(!res.ok || data.ok===false) throw new Error(data.error||"Erro na solicitação");
-    return data;
-  }
-
-  function showLogin(){ $("login").classList.remove("hidden"); $("logout").classList.add("hidden"); }
-  function hideLogin(){ $("login").classList.add("hidden"); $("logout").classList.remove("hidden"); }
-
-  async function loadLeads(){
-    document.body.classList.add("loading");
-    try{
-      const data=await api("/api/leads"); leads=data.leads||[]; render(); hideLogin();
-    }catch(e){ if(authKey()) toast(e.message); }
-    finally{ document.body.classList.remove("loading"); }
-  }
-
-  function render(){
-    const q=$("search").value.trim().toLowerCase();
-    const filtered=leads.filter(l=>`${l.nome||""} ${l.telefone||""} ${l.wa_id||""}`.toLowerCase().includes(q));
-    $("rows").innerHTML="";
-    $("empty").classList.toggle("hidden",filtered.length>0);
-
-    for(const lead of filtered){
-      const tr=document.createElement("tr");
-      const tdClient=document.createElement("td");
-      const n=document.createElement("div"); n.className="name"; n.textContent=lead.nome||"Sem nome";
-      const p=document.createElement("div"); p.className="phone"; p.textContent=lead.telefone||lead.wa_id||"—";
-      tdClient.append(n,p);
-
-      const tdMsg=document.createElement("td"); const msg=document.createElement("div"); msg.className="message"; msg.textContent=lead.mensagem||"—"; tdMsg.append(msg);
-
-      const tdOrigin=document.createElement("td");
-      const origin=document.createElement("span"); origin.className=`badge ${lead.ctwa_clid?"green":"gray"}`; origin.textContent=lead.ctwa_clid?"Anúncio WhatsApp":"Sem CTWA"; tdOrigin.append(origin);
-      if(lead.headline){ const h=document.createElement("div"); h.className="phone"; h.textContent=lead.headline; tdOrigin.append(h); }
-
-      const tdStatus=document.createElement("td"); const status=document.createElement("span"); status.className=`badge ${lead.comprou?"green":"amber"}`; status.textContent=lead.comprou?"Compra enviada":"Novo"; tdStatus.append(status);
-      const tdDate=document.createElement("td"); tdDate.textContent=dateTime(lead.ultima_mensagem_em||lead.created_at);
-      const tdAction=document.createElement("td"); const btn=document.createElement("button"); btn.className="btn btn-primary";
-      if(lead.comprou){ btn.textContent=`Enviado ${lead.valor_venda?money(lead.valor_venda):""}`; btn.disabled=true; }
-      else if(!lead.ctwa_clid){ btn.textContent="Sem vínculo de anúncio"; btn.disabled=true; }
-      else { btn.textContent="Marcar como compra"; btn.onclick=()=>purchase(lead); }
-      tdAction.append(btn);
-      tr.append(tdClient,tdMsg,tdOrigin,tdStatus,tdDate,tdAction); $("rows").append(tr);
-    }
-
-    $("mLeads").textContent=leads.length;
-    $("mAds").textContent=leads.filter(l=>l.ctwa_clid).length;
-    $("mPurchases").textContent=leads.filter(l=>l.comprou).length;
-    $("mRevenue").textContent=money(leads.filter(l=>l.comprou).reduce((s,l)=>s+Number(l.valor_venda||0),0));
-  }
-
-  async function purchase(lead){
-    const raw=prompt(`Valor da venda para ${lead.nome||lead.telefone||"este cliente"}:`,`0,00`);
-    if(raw===null) return;
-    const value=Number(raw.replace(/\./g,"").replace(",","."));
-    if(!Number.isFinite(value)||value<=0){ toast("Digite um valor válido."); return; }
-    if(!confirm(`Confirmar compra de ${money(value)}? Este evento será enviado para a Meta.`)) return;
-    try{
-      const data=await api("/api/purchase",{method:"POST",body:JSON.stringify({lead_id:lead.id,value,currency:"BRL"})});
-      toast(data.message||"Compra enviada para a Meta"); await loadLeads();
-    }catch(e){ toast(e.message); }
-  }
-
-  $("loginForm").addEventListener("submit",async(e)=>{
-    e.preventDefault(); $("loginError").textContent="";
-    sessionStorage.setItem(keyName,$("password").value);
-    try{ await loadLeads(); }
-    catch(err){ $("loginError").textContent=err.message; }
-  });
-  $("logout").onclick=()=>{sessionStorage.removeItem(keyName);showLogin();};
-  $("refresh").onclick=loadLeads;
-  $("search").addEventListener("input",render);
-
-  if(authKey()) loadLeads(); else showLogin();
-</script>
+  <footer class="footer"><div class="wrap"><span>© 2026 Auron Marketing LTDA</span><a href="/privacidade">Política de Privacidade</a></div></footer>
 </body>
 </html>
