@@ -34,6 +34,69 @@ async function supabaseRequest(path, options = {}) {
   return data;
 }
 
+async function metaRequest(path, { method = "GET", body } = {}) {
+  const accessToken = process.env.META_ACCESS_TOKEN;
+  const graphVersion = process.env.META_GRAPH_VERSION || "v26.0";
+
+  if (!accessToken) {
+    throw new Error("META_ACCESS_TOKEN não configurado");
+  }
+
+  const response = await fetch(`https://graph.facebook.com/${graphVersion}/${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+
+  const text = await response.text();
+  let data = null;
+  if (text) {
+    try { data = JSON.parse(text); } catch { data = text; }
+  }
+
+  if (!response.ok) {
+    const err = new Error(`Meta ${response.status}`);
+    err.meta = data;
+    throw err;
+  }
+
+  return data;
+}
+
+function extractDatasetId(data) {
+  if (!data) return null;
+  if (typeof data.id === "string" || typeof data.id === "number") return String(data.id);
+  if (Array.isArray(data.data) && data.data[0]?.id) return String(data.data[0].id);
+  return null;
+}
+
+async function getOrCreateDatasetId(wabaId) {
+  const forced = process.env.META_DATASET_ID;
+  if (forced) return forced;
+
+  try {
+    const current = await metaRequest(`${encodeURIComponent(wabaId)}/dataset`);
+    const currentId = extractDatasetId(current);
+    if (currentId) return currentId;
+  } catch (error) {
+    console.log("DATASET_GET_NAO_DISPONIVEL", error?.meta || error?.message || error);
+  }
+
+  const created = await metaRequest(`${encodeURIComponent(wabaId)}/dataset`, { method: "POST" });
+  const createdId = extractDatasetId(created);
+
+  if (!createdId) {
+    const err = new Error("A Meta não retornou o dataset_id");
+    err.meta = created;
+    throw err;
+  }
+
+  return createdId;
+}
+
 function makeLocalEventId() {
   return `auron_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -75,18 +138,17 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const accessToken = process.env.META_ACCESS_TOKEN;
-    const datasetId = process.env.META_DATASET_ID;
-    const graphVersion = process.env.META_GRAPH_VERSION || "v26.0";
-
-    if (!accessToken || !datasetId) {
+    if (!process.env.META_ACCESS_TOKEN) {
       return Response.json({
         ok: false,
-        error: "Meta CAPI ainda não configurada. Faltam META_ACCESS_TOKEN e/ou META_DATASET_ID na Vercel."
+        error: "Meta CAPI ainda não configurada. Falta META_ACCESS_TOKEN na Vercel."
       }, { status: 503 });
     }
 
+    const datasetId = await getOrCreateDatasetId(lead.waba_id);
     const eventTime = Math.floor(Date.now() / 1000);
+    const eventCurrency = String(currency || lead.moeda || "BRL").toUpperCase();
+
     const payload = {
       data: [
         {
@@ -99,36 +161,17 @@ export async function POST(request) {
             ctwa_clid: lead.ctwa_clid,
           },
           custom_data: {
-            currency: String(currency || lead.moeda || "BRL").toUpperCase(),
+            currency: eventCurrency,
             value: numericValue,
           },
         },
       ],
     };
 
-    const metaResponse = await fetch(`https://graph.facebook.com/${graphVersion}/${datasetId}/events`, {
+    const metaData = await metaRequest(`${encodeURIComponent(datasetId)}/events`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+      body: payload,
     });
-
-    const metaText = await metaResponse.text();
-    let metaData = null;
-    if (metaText) {
-      try { metaData = JSON.parse(metaText); } catch { metaData = metaText; }
-    }
-
-    if (!metaResponse.ok) {
-      console.error("META_PURCHASE_ERRO", metaResponse.status, metaData);
-      return Response.json({
-        ok: false,
-        error: "A Meta recusou o evento de compra",
-        meta: metaData,
-      }, { status: 502 });
-    }
 
     const localEventId = makeLocalEventId();
     const sentAt = new Date().toISOString();
@@ -140,22 +183,27 @@ export async function POST(request) {
         status: "comprou",
         comprou: true,
         valor_venda: numericValue,
-        moeda: String(currency || lead.moeda || "BRL").toUpperCase(),
+        moeda: eventCurrency,
         meta_event_id: localEventId,
         purchase_sent_at: sentAt,
       }),
     });
 
-    console.log("PURCHASE_ENVIADO", { lead_id: lead.id, event: localEventId });
+    console.log("PURCHASE_ENVIADO", { lead_id: lead.id, event: localEventId, dataset_id: datasetId });
 
     return Response.json({
       ok: true,
       message: "Compra enviada para a Meta",
       event_id: localEventId,
+      dataset_id: datasetId,
       meta: metaData,
     });
   } catch (error) {
-    console.error("PURCHASE_ERRO", error?.message || error);
-    return Response.json({ ok: false, error: error?.message || "Erro interno" }, { status: 500 });
+    console.error("PURCHASE_ERRO", error?.meta || error?.message || error);
+    return Response.json({
+      ok: false,
+      error: error?.message || "Erro interno",
+      ...(error?.meta ? { meta: error.meta } : {}),
+    }, { status: 500 });
   }
 }
