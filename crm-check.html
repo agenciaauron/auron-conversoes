@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Integração CRM | Auron Conversões</title>
+  <style>
+    :root{--purple:#541285;--bg:#f6f5f8;--card:#fff;--text:#17151a;--muted:#716b78;--border:#e8e4eb;--green:#16794b;--red:#b42318}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(680px,100%);background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;box-shadow:0 18px 60px rgba(0,0,0,.08)}h1{margin:0 0 8px;font-size:26px}p{margin:0 0 18px;color:var(--muted);line-height:1.5}label{display:block;font-weight:700;margin:14px 0 7px}input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font:inherit}.btn{margin-top:16px;width:100%;border:0;border-radius:10px;background:var(--purple);color:#fff;padding:12px 15px;font-weight:800;cursor:pointer}.result{margin-top:18px;border:1px solid var(--border);border-radius:12px;padding:14px;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Consolas,monospace;font-size:13px;min-height:54px}.ok{color:var(--green)}.error{color:var(--red)}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Integração com o Auron CRM</h1>
+    <p>Valida a conexão com o banco do CRM, a empresa Auron Marketing, a etapa inicial do funil e os campos da integração WhatsApp.</p>
+    <label for="password">Senha do painel</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <button id="run" class="btn">Testar integração</button>
+    <div id="result" class="result">Aguardando teste...</div>
+  </main>
+<script>
+const result=document.getElementById('result');
+document.getElementById('run').onclick=async()=>{
+  result.className='result';
+  result.textContent='Validando Auron CRM...';
+  try{
+    const res=await fetch('/api/crm-check',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-auron-key':document.getElementById('password').value}
+    });
+    const data=await res.json();
+    result.classList.add(data.ok?'ok':'error');
+    result.textContent=JSON.stringify(data,null,2);
+  }catch(e){
+    result.classList.add('error');
+    result.textContent=e.message||String(e);
+  }
+};
+</script>
+</body>
+</html>
