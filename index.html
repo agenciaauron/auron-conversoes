@@ -577,14 +577,14 @@ p,li,span,a:not(.cta-button):not(.header-cta):not(.menu-cta):not(.plan-cta):not(
 @media(prefers-reduced-motion:no-preference){
   .scroll-reveal{
     opacity:0;
-    translate:0 16px;
+    translate:0 12px;
     will-change:opacity,translate
   }
   .scroll-reveal.is-visible{
-    animation:auronScrollReveal .62s cubic-bezier(.22,.61,.36,1) var(--reveal-delay,0ms) both
+    animation:auronScrollReveal .35s cubic-bezier(.22,.61,.36,1) var(--reveal-delay,0ms) both
   }
   @keyframes auronScrollReveal{
-    from{opacity:0;translate:0 16px}
+    from{opacity:0;translate:0 12px}
     to{opacity:1;translate:0 0}
   }
 }
@@ -652,55 +652,55 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(!el||prepared.has(el)||el.closest(".hero"))return;
     prepared.add(el);
     el.classList.add("scroll-reveal");
-    el.style.setProperty("--reveal-delay",Math.min(delay,420)+"ms");
+    el.style.setProperty("--reveal-delay",Math.min(delay,150)+"ms");
   };
-  const sequence=(selector,step=85,base=0,cap=420)=>{
+  const sequence=(selector,step=30,base=0,cap=150)=>{
     document.querySelectorAll(selector).forEach((el,i)=>prepare(el,Math.min(base+i*step,cap)));
   };
   const heading=(root)=>{
     prepare(document.querySelector(root+" .section-kicker"),0);
-    prepare(document.querySelector(root+" h2"),60);
-    prepare(document.querySelector(root+" p"),145);
+    prepare(document.querySelector(root+" h2"),15);
+    prepare(document.querySelector(root+" p"),30);
   };
 
   heading("#clientes");
-  sequence("#clientes .client-card",85,35);
+  sequence("#clientes .client-card",30,10);
 
   heading(".social-proof-section");
-  sequence(".social-proof-section .proof-slide",80,35);
-  sequence(".social-proof-section .proof-arrow",70,300);
-  prepare(document.querySelector(".social-proof-section .proof-indicators"),360);
-  prepare(document.querySelector(".social-proof-section .proof-support-text"),410);
+  sequence(".social-proof-section .proof-slide",30,10);
+  sequence(".social-proof-section .proof-arrow",20,70);
+  prepare(document.querySelector(".social-proof-section .proof-indicators"),85);
+  prepare(document.querySelector(".social-proof-section .proof-support-text"),100);
 
   heading("#estrategia");
-  sequence("#estrategia .compare-card",95,60);
+  sequence("#estrategia .compare-card",35,15);
 
   prepare(document.querySelector(".segments-feature-copy .section-kicker"),0);
-  prepare(document.querySelector(".segments-feature-copy h2"),60);
-  prepare(document.querySelector(".segments-feature-copy p"),145);
-  sequence(".segments-feature-section .segment-cloud span",70,70,385);
+  prepare(document.querySelector(".segments-feature-copy h2"),15);
+  prepare(document.querySelector(".segments-feature-copy p"),30);
+  sequence(".segments-feature-section .segment-cloud span",25,10,120);
 
   prepare(document.querySelector("#servicos .pricing-heading .section-kicker"),0);
-  prepare(document.querySelector("#servicos .pricing-heading h2"),60);
-  prepare(document.querySelector("#servicos .pricing-heading p"),145);
-  sequence("#servicos .pricing-card",95,65);
+  prepare(document.querySelector("#servicos .pricing-heading h2"),15);
+  prepare(document.querySelector("#servicos .pricing-heading p"),30);
+  sequence("#servicos .pricing-card",35,15);
 
   heading("#processo");
-  sequence("#processo .process-line article",95,55);
-  prepare(document.querySelector("#processo .process-speed-note"),350);
+  sequence("#processo .process-line article",35,15);
+  prepare(document.querySelector("#processo .process-speed-note"),100);
 
   prepare(document.querySelector(".owners-heading"),0);
-  sequence(".owners-grid .owner-card",100,85);
+  sequence(".owners-grid .owner-card",35,15);
 
   prepare(document.querySelector("#duvidas .faq-clean-heading h2"),0);
-  prepare(document.querySelector("#duvidas .faq-clean-heading p"),100);
-  sequence("#duvidas .faq-item",80,55);
+  prepare(document.querySelector("#duvidas .faq-clean-heading p"),20);
+  sequence("#duvidas .faq-item",30,10);
 
   prepare(document.querySelector("#contato .final-icon"),0);
-  prepare(document.querySelector("#contato h2"),70);
-  prepare(document.querySelector("#contato p"),150);
-  prepare(document.querySelector("#contato .final-sales-cta"),240);
-  prepare(document.querySelector("#contato .final-note"),320);
+  prepare(document.querySelector("#contato h2"),15);
+  prepare(document.querySelector("#contato p"),30);
+  prepare(document.querySelector("#contato .final-sales-cta"),45);
+  prepare(document.querySelector("#contato .final-note"),60);
 
   const targets=[...prepared];
   if(!("IntersectionObserver" in window)){
@@ -719,9 +719,9 @@ document.addEventListener("DOMContentLoaded",()=>{
         el.style.removeProperty("--reveal-delay");
       };
       el.addEventListener("animationend",cleanup,{once:true});
-      setTimeout(cleanup,1250);
+      setTimeout(cleanup,800);
     });
-  },{threshold:.12,rootMargin:"0px 0px -10% 0px"});
+  },{threshold:.06,rootMargin:"0px 0px -4% 0px"});
 
   targets.forEach(el=>observer.observe(el));
 });
