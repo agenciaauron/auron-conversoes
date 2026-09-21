@@ -550,7 +550,8 @@ p,li,span,a:not(.cta-button):not(.header-cta):not(.menu-cta):not(.plan-cta):not(
 }
 @media(max-width:860px){
   .hero-grid{grid-template-columns:1fr;gap:30px}
-  .hero-visual{width:min(100%,480px);margin:4px auto 0}
+  .hero-visual{order:1;width:min(100%,480px);margin:4px auto 0}
+  .hero-copy{order:2}
   .hero-logo-core{width:48%}
 }
 @media(max-width:620px){
