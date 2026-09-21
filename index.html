@@ -572,6 +572,30 @@ p,li,span,a:not(.cta-button):not(.header-cta):not(.menu-cta):not(.plan-cta):not(
 @media(prefers-reduced-motion:reduce){
   .hero-logo-core{animation:none}
 }
+
+/* Scroll reveal discreto: aplicado via IntersectionObserver, uma única vez */
+@media(prefers-reduced-motion:no-preference){
+  .scroll-reveal{
+    opacity:0;
+    translate:0 16px;
+    will-change:opacity,translate
+  }
+  .scroll-reveal.is-visible{
+    animation:auronScrollReveal .62s cubic-bezier(.22,.61,.36,1) var(--reveal-delay,0ms) both
+  }
+  @keyframes auronScrollReveal{
+    from{opacity:0;translate:0 16px}
+    to{opacity:1;translate:0 0}
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .scroll-reveal,
+  .scroll-reveal.is-visible{
+    opacity:1!important;
+    translate:none!important;
+    animation:none!important
+  }
+}
 </style></head><body><main id="inicio"><header class="site-header"><div class="container nav-shell"><a href="#inicio" class="brand" aria-label="Auron Marketing, início"><img class="brand-logo" src="/auron-logo.svg" alt="" aria-hidden="true"><span class="brand-name">AURON</span></a><nav class="desktop-nav" aria-label="Navegação principal"><a href="#clientes">Clientes</a><a href="#servicos">Serviços</a><a href="#processo">Como funciona</a><a href="#duvidas">Dúvidas</a></nav><a href="https://wa.me/5543920004178" class="header-cta" target="_blank" rel="noopener noreferrer">Falar com a Auron <i data-lucide="chevron-right"></i></a><details class="mobile-menu"><summary aria-label="Abrir menu"><i data-lucide="menu" class="menu-open"></i><i data-lucide="x" class="menu-close"></i></summary><nav aria-label="Navegação para celular"><a href="#clientes">Clientes</a><a href="#servicos">Serviços</a><a href="#processo">Como funciona</a><a href="#duvidas">Dúvidas</a><a href="https://wa.me/5543920004178" class="menu-cta" target="_blank" rel="noopener noreferrer">Falar com a Auron</a></nav></details></div></header>
 <section class="hero section-dark"><div class="noise"></div><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="container hero-grid"><div class="hero-copy reveal"><h1>Conteúdo, tráfego e estratégia para sua empresa sair do comum e <span class="headline-accent">vender mais.</span></h1><p class="hero-description">Unimos conteúdo, tráfego pago e estratégia para colocar sua marca na frente das pessoas certas e transformar atenção em novas oportunidades de venda.</p><ul class="hero-list"><li><i data-lucide="check"></i> Tráfego pago no Meta e Google</li><li><i data-lucide="check"></i> Conteúdo estratégico para posicionar e vender</li><li><i data-lucide="check"></i> Jornada mais organizada até a venda</li></ul><div class="hero-actions"><a href="#servicos" class="cta-button hero-pulse-cta">Quero atrair mais clientes<i data-lucide="arrow-right"></i></a></div></div><div class="hero-visual reveal" aria-label="Logo da Auron com plataformas digitais em órbita"><div class="hero-visual-aura" aria-hidden="true"></div><div class="orbit-ring orbit-ring-outer" aria-hidden="true"></div><div class="orbit-ring orbit-ring-middle" aria-hidden="true"></div><div class="orbit-ring orbit-ring-inner" aria-hidden="true"></div><div class="hero-logo-core" aria-hidden="true"><img src="/auron-hero-vector.svg" alt=""></div><div class="orbit-item" data-ring="outer" data-speed=".142" data-phase="3.85" aria-hidden="true"><div class="platform-tile"><svg class="platform-mark" viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="igGlow" cx="28%" cy="104%" r="120%"><stop offset="0" stop-color="#ffd600"/><stop offset=".28" stop-color="#ff7a00"/><stop offset=".52" stop-color="#ff0169"/><stop offset=".76" stop-color="#d300c5"/><stop offset="1" stop-color="#7638fa"/></radialGradient></defs><rect x="8" y="8" width="84" height="84" rx="25" fill="url(#igGlow)"/><rect x="27" y="27" width="46" height="46" rx="14" fill="none" stroke="#fff" stroke-width="7"/><circle cx="50" cy="50" r="11.5" fill="none" stroke="#fff" stroke-width="7"/><circle cx="69" cy="31" r="4.5" fill="#fff"/></svg></div></div><div class="orbit-item" data-ring="middle" data-speed="-.166" data-phase="5.55" aria-hidden="true"><div class="platform-tile"><svg class="platform-mark" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="#1877F2"/><path fill="#fff" d="M57 82V54h10l2-12H57v-7c0-3.6 1.8-7 7.5-7H70V17.5c-1-.1-4.3-.5-8.2-.5-8.1 0-13.7 4.9-13.7 14V42H38v12h10.1v28H57Z"/></svg></div></div><div class="orbit-item" data-ring="inner" data-speed=".188" data-phase=".45" aria-hidden="true"><div class="platform-tile"><img class="platform-mark platform-mark-meta" src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Meta_Platforms_logo.svg" alt="" aria-hidden="true" decoding="async"></div></div><div class="orbit-item" data-ring="outer" data-speed=".151" data-phase=".72" aria-hidden="true"><div class="platform-tile"><img class="platform-mark platform-mark-google" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="" aria-hidden="true" decoding="async"></div></div><div class="orbit-item" data-ring="middle" data-speed="-.158" data-phase="2.48" aria-hidden="true"><div class="platform-tile"><svg class="platform-mark" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-3 2)" fill="#25F4EE"><path d="M57 17h11c1 10 7 18 17 21v11c-7 0-13-2-18-6v24c0 14-10 24-24 24-13 0-23-9-23-22 0-13 10-23 23-23 2 0 4 .2 6 .7v12c-2-.7-3.7-1-5.5-1-6 0-11 4.8-11 11 0 6.5 4.5 11 10.5 11 7 0 11-4.8 11-13V17h3Z"/></g><g transform="translate(3 -1)" fill="#FE2C55"><path d="M57 17h11c1 10 7 18 17 21v11c-7 0-13-2-18-6v24c0 14-10 24-24 24-13 0-23-9-23-22 0-13 10-23 23-23 2 0 4 .2 6 .7v12c-2-.7-3.7-1-5.5-1-6 0-11 4.8-11 11 0 6.5 4.5 11 10.5 11 7 0 11-4.8 11-13V17h3Z"/></g><path fill="#fff" d="M57 17h11c1 10 7 18 17 21v11c-7 0-13-2-18-6v24c0 14-10 24-24 24-13 0-23-9-23-22 0-13 10-23 23-23 2 0 4 .2 6 .7v12c-2-.7-3.7-1-5.5-1-6 0-11 4.8-11 11 0 6.5 4.5 11 10.5 11 7 0 11-4.8 11-13V17h3Z"/></svg></div></div><div class="orbit-item" data-ring="inner" data-speed=".196" data-phase="3.58" aria-hidden="true"><div class="platform-tile"><svg class="platform-mark" viewBox="0 0 100 100" aria-hidden="true"><path fill="#FF0000" d="M92 33.5c-1-7-5-11-12-12C72 20 58 20 50 20s-22 0-30 1.5c-7 1-11 5-12 12C7 39 7 45 7 50s0 11 1 16.5c1 7 5 11 12 12C28 80 42 80 50 80s22 0 30-1.5c7-1 11-5 12-12 1-5.5 1-11.5 1-16.5s0-11-1-16.5Z"/><path fill="#fff" d="m43 64 22-14-22-14v28Z"/></svg></div></div><div class="hero-floor-glow" aria-hidden="true"></div></div></div></section>
 
@@ -586,11 +610,11 @@ p,li,span,a:not(.cta-button):not(.header-cta):not(.menu-cta):not(.plan-cta):not(
 </div></div></section><section id="processo" class="section process-section"><div class="container"><div class="section-heading centered"><span class="section-kicker">Como funciona</span><h2>Um processo simples, do diagnóstico <span>à evolução.</span></h2><p>Você entende o que está sendo feito e acompanha o trabalho sem complicação.</p></div><div class="process-line"><article><span>01</span><div class="process-icon"><i data-lucide="search"></i></div><h3>Entendemos o cenário</h3><p>Analisamos empresa, público, oferta, região e o momento atual.</p></article><article><span>02</span><div class="process-icon"><i data-lucide="crosshair"></i></div><h3>Montamos a estratégia</h3><p>Definimos canais, comunicação, campanhas e prioridades.</p></article><article><span>03</span><div class="process-icon"><i data-lucide="trending-up"></i></div><h3>Executamos e ajustamos</h3><p>Colocamos no ar, acompanhamos os sinais e melhoramos o caminho.</p></article></div><div class="process-speed-note"><i data-lucide="clock-3"></i><span>Sua estrutura de marketing implementada em até <strong>24 HORAS</strong>.</span></div></div></section>
 </div><section class="owners-section" aria-labelledby="owners-title">
   <div class="container owners-shell">
-    <div class="owners-heading reveal">
+    <div class="owners-heading">
       <h2 id="owners-title">Quem faz a <span>Auron</span> acontecer</h2>
     </div>
     <div class="owners-grid">
-      <article class="owner-card rafael reveal">
+      <article class="owner-card rafael">
         <div class="owner-photo"><img src="/rafael-card.webp" alt="Rafael Marques, sócio fundador da Auron" loading="lazy"></div>
         <div class="owner-card-body">
           <div class="owner-topline">Sócio fundador</div>
@@ -599,7 +623,7 @@ p,li,span,a:not(.cta-button):not(.header-cta):not(.menu-cta):not(.plan-cta):not(
           <p>Cuida da parte operacional da Auron, acompanhando campanhas, estratégia, organização dos processos e a execução do que realmente faz o projeto sair do papel.</p>
         </div>
       </article>
-      <article class="owner-card kaic reveal">
+      <article class="owner-card kaic">
         <div class="owner-photo"><img src="/kaic-card.webp" alt="Kaic Rainieri, sócio fundador da Auron" loading="lazy"></div>
         <div class="owner-card-body">
           <div class="owner-topline">Sócio fundador</div>
@@ -619,5 +643,88 @@ p,li,span,a:not(.cta-button):not(.header-cta):not(.menu-cta):not(.plan-cta):not(
 </div></div></section>
 <section id="contato" class="final-cta"><div class="container final-cta-content"><span class="final-icon" aria-hidden="true"><span class="final-mini-icon"><svg class="final-calendar-icon" viewBox="0 0 48 48"><path fill="#4285F4" d="M10 6h23l7 7v25a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4Z"/><path fill="#34A853" d="M6 28h34v10a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V28Z"/><path fill="#FBBC04" d="M31 6h5a4 4 0 0 1 4 4v18H31V6Z"/><path fill="#EA4335" d="M31 28h9v10a4 4 0 0 1-4 4h-5V28Z"/><path fill="#fff" d="M13 15h22v20H13z"/><path fill="#1A73E8" d="M20.7 30.6c-2.3 0-4-.9-4.7-2.6l2.4-1.1c.4 1 1.2 1.5 2.3 1.5 1.2 0 2-.7 2-1.7 0-1.1-.9-1.7-2.4-1.7h-1.1v-2h1c1.3 0 2.1-.6 2.1-1.5 0-.8-.7-1.4-1.8-1.4-.9 0-1.6.4-2 1.2l-2.3-1.1c.8-1.5 2.3-2.3 4.4-2.3 2.6 0 4.4 1.3 4.4 3.4 0 1.2-.6 2.2-1.8 2.8 1.4.5 2.2 1.6 2.2 3 0 2.2-1.8 3.5-4.7 3.5ZM30.2 30.3V20.9l-2.2 1.6-1.3-1.9 3.9-2.8h2.3v12.5h-2.7Z"/></svg></span><span class="final-plus">+</span><span class="final-mini-icon"><svg class="final-whatsapp-icon" viewBox="0 0 48 48"><path fill="#25D366" d="M24 5.5c10.2 0 18.5 8 18.5 18 0 10.1-8.3 18.1-18.5 18.1-3.2 0-6.2-.8-8.8-2.2L6 42.5l3-8.8a17.7 17.7 0 0 1-3.5-10.2c0-10 8.3-18 18.5-18Z"/><path fill="#fff" d="M19 14.3c-.5-1.1-1-1.1-1.5-1.1h-1.3c-.5 0-1.2.2-1.8.9-.6.7-2.4 2.4-2.4 5.8s2.5 6.8 2.8 7.3c.3.5 4.8 7.6 11.8 10.3 5.8 2.2 7 1.8 8.3 1.6 1.3-.2 4.2-1.7 4.8-3.4.6-1.7.6-3.1.4-3.4-.2-.3-.7-.5-1.4-.9-.8-.4-4.2-2.1-4.8-2.3-.6-.2-1.1-.4-1.6.4-.5.8-1.9 2.3-2.3 2.8-.4.5-.9.6-1.7.2-.8-.4-3.2-1.2-6.1-3.8-2.3-2-3.8-4.5-4.2-5.3-.4-.8 0-1.2.3-1.6.3-.3.8-.9 1.1-1.3.4-.5.5-.8.8-1.3.3-.5.1-1-.1-1.4l-2.1-5.5Z"/></svg></span></span><h2>Sua empresa merece estar na frente do mercado.</h2><p>Não deixe a concorrência dominar enquanto você espera. Agende agora uma reunião sem compromisso e veja o que podemos fazer pelo seu negócio.</p><a href="https://wa.me/5543920004178?text=Ol%C3%A1%2C%20vim%20pelo%20site%20e%20gostaria%20de%20agendar%20uma%20reuni%C3%A3o." class="cta-button large final-sales-cta" target="_blank" rel="noopener noreferrer">Quero agendar uma reunião sem compromisso<i data-lucide="arrow-right"></i></a><span class="final-note"><i data-lucide="zap"></i> Resposta em até 10 minutos no horário comercial</span></div></section></div>
 <footer><div class="container footer-shell"><div><a href="#inicio" class="brand" aria-label="Auron Marketing, início"><img class="brand-logo" src="/auron-logo.svg" alt="" aria-hidden="true"><span class="brand-name">AURON</span></a><p>Marketing com estratégia, proximidade e foco no que movimenta a empresa.</p></div><div class="footer-links"><a href="#servicos">Serviços</a><a href="#processo">Como funciona</a><a href="#duvidas">Dúvidas</a></div><div class="footer-location"><strong>Londrina, Paraná</strong><span>Atendimento para empresas de todo o Brasil</span></div></div><div class="container footer-bottom"><span>© 2026 Auron Marketing. Todos os direitos reservados.</span><span>Feito para transformar atenção em oportunidade.</span></div><div class="container footer-cnpj">CNPJ 64.679.952/0001-66</div></footer></main><script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script><script>document.addEventListener("DOMContentLoaded",()=>{if(window.lucide)window.lucide.createIcons();document.querySelectorAll(".faq-trigger").forEach(btn=>btn.addEventListener("click",()=>{const item=btn.closest(".faq-item");const was=item.classList.contains("open");document.querySelectorAll(".faq-item.open").forEach(x=>{x.classList.remove("open");x.querySelector(".faq-trigger")?.setAttribute("aria-expanded","false")});if(!was){item.classList.add("open");btn.setAttribute("aria-expanded","true")}}));const shell=document.querySelector(".proof-carousel-shell"),track=document.querySelector(".proof-carousel-track"),slides=[...document.querySelectorAll(".proof-slide")],dots=document.querySelector(".proof-indicators");if(shell&&track&&slides.length&&dots){let index=0,visible=innerWidth<=860?1:3,max=Math.max(0,slides.length-visible);const renderDots=()=>{dots.innerHTML="";for(let i=0;i<=max;i++){const b=document.createElement("button");b.type="button";b.className=i===index?"active":"";b.setAttribute("aria-label",`Ir para o resultado ${i+1}`);b.onclick=()=>{index=i;render()};dots.appendChild(b)}};const render=()=>{track.style.transform=`translateX(-${index*(100/visible)}%)`;[...dots.children].forEach((d,i)=>d.classList.toggle("active",i===index))};shell.querySelector(".proof-arrow-prev")?.addEventListener("click",()=>{index=index<=0?max:index-1;render()});shell.querySelector(".proof-arrow-next")?.addEventListener("click",()=>{index=index>=max?0:index+1;render()});const viewport=shell.querySelector(".proof-carousel-viewport");if(viewport){let touchX=0,touchY=0;viewport.addEventListener("touchstart",e=>{if(innerWidth>860||!e.touches.length)return;touchX=e.touches[0].clientX;touchY=e.touches[0].clientY},{passive:true});viewport.addEventListener("touchend",e=>{if(innerWidth>860||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touchX,dy=e.changedTouches[0].clientY-touchY;if(Math.abs(dx)<45||Math.abs(dx)<=Math.abs(dy))return;index=dx<0?(index>=max?0:index+1):(index<=0?max:index-1);render()},{passive:true})}addEventListener("resize",()=>{visible=innerWidth<=860?1:3;max=Math.max(0,slides.length-visible);index=Math.min(index,max);renderDots();render()});renderDots();render()}document.querySelectorAll('.mobile-menu nav a').forEach(a=>a.addEventListener('click',()=>a.closest('details')?.removeAttribute('open')));});</script><script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce)return;
+
+  const prepared=new Set();
+  const prepare=(el,delay=0)=>{
+    if(!el||prepared.has(el)||el.closest(".hero"))return;
+    prepared.add(el);
+    el.classList.add("scroll-reveal");
+    el.style.setProperty("--reveal-delay",Math.min(delay,420)+"ms");
+  };
+  const sequence=(selector,step=85,base=0,cap=420)=>{
+    document.querySelectorAll(selector).forEach((el,i)=>prepare(el,Math.min(base+i*step,cap)));
+  };
+  const heading=(root)=>{
+    prepare(document.querySelector(root+" .section-kicker"),0);
+    prepare(document.querySelector(root+" h2"),60);
+    prepare(document.querySelector(root+" p"),145);
+  };
+
+  heading("#clientes");
+  sequence("#clientes .client-card",85,35);
+
+  heading(".social-proof-section");
+  sequence(".social-proof-section .proof-slide",80,35);
+  sequence(".social-proof-section .proof-arrow",70,300);
+  prepare(document.querySelector(".social-proof-section .proof-indicators"),360);
+  prepare(document.querySelector(".social-proof-section .proof-support-text"),410);
+
+  heading("#estrategia");
+  sequence("#estrategia .compare-card",95,60);
+
+  prepare(document.querySelector(".segments-feature-copy .section-kicker"),0);
+  prepare(document.querySelector(".segments-feature-copy h2"),60);
+  prepare(document.querySelector(".segments-feature-copy p"),145);
+  sequence(".segments-feature-section .segment-cloud span",70,70,385);
+
+  prepare(document.querySelector("#servicos .pricing-heading .section-kicker"),0);
+  prepare(document.querySelector("#servicos .pricing-heading h2"),60);
+  prepare(document.querySelector("#servicos .pricing-heading p"),145);
+  sequence("#servicos .pricing-card",95,65);
+
+  heading("#processo");
+  sequence("#processo .process-line article",95,55);
+  prepare(document.querySelector("#processo .process-speed-note"),350);
+
+  prepare(document.querySelector(".owners-heading"),0);
+  sequence(".owners-grid .owner-card",100,85);
+
+  prepare(document.querySelector("#duvidas .faq-clean-heading h2"),0);
+  prepare(document.querySelector("#duvidas .faq-clean-heading p"),100);
+  sequence("#duvidas .faq-item",80,55);
+
+  prepare(document.querySelector("#contato .final-icon"),0);
+  prepare(document.querySelector("#contato h2"),70);
+  prepare(document.querySelector("#contato p"),150);
+  prepare(document.querySelector("#contato .final-sales-cta"),240);
+  prepare(document.querySelector("#contato .final-note"),320);
+
+  const targets=[...prepared];
+  if(!("IntersectionObserver" in window)){
+    targets.forEach(el=>el.classList.remove("scroll-reveal"));
+    return;
+  }
+
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting)return;
+      const el=entry.target;
+      el.classList.add("is-visible");
+      observer.unobserve(el);
+      const cleanup=()=>{
+        el.classList.remove("scroll-reveal","is-visible");
+        el.style.removeProperty("--reveal-delay");
+      };
+      el.addEventListener("animationend",cleanup,{once:true});
+      setTimeout(cleanup,1250);
+    });
+  },{threshold:.12,rootMargin:"0px 0px -10% 0px"});
+
+  targets.forEach(el=>observer.observe(el));
+});
+</script><script>
 (()=>{const visual=document.querySelector('.hero-visual');if(!visual)return;const items=[...visual.querySelectorAll('.orbit-item')];const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const rings={outer:{rx:.44,ry:.267,tilt:-.12},middle:{rx:.385,ry:.218,tilt:.085},inner:{rx:.315,ry:.176,tilt:-.052}};let start=performance.now();function draw(now){const w=visual.clientWidth,h=visual.clientHeight;items.forEach(item=>{const cfg=rings[item.dataset.ring]||rings.middle;const speed=parseFloat(item.dataset.speed||'0');const phase=parseFloat(item.dataset.phase||'0');const t=reduce?phase:phase+((now-start)/1000)*speed;const rx=w*cfg.rx,ry=h*cfg.ry;const bx=Math.cos(t)*rx,by=Math.sin(t)*ry;const ca=Math.cos(cfg.tilt),sa=Math.sin(cfg.tilt);const x=bx*ca-by*sa,y=bx*sa+by*ca;const depth=(Math.sin(t)+1)/2;item.style.setProperty('--orbit-x',x.toFixed(2)+'px');item.style.setProperty('--orbit-y',y.toFixed(2)+'px');item.style.setProperty('--orbit-scale',(0.87+depth*.16).toFixed(3));item.style.setProperty('--orbit-opacity',(0.72+depth*.28).toFixed(3));item.style.zIndex=depth>.53?'7':'3';});if(!reduce)requestAnimationFrame(draw)}requestAnimationFrame(draw);})();
 </script></body></html>
