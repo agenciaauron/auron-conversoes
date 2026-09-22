@@ -173,6 +173,74 @@ async function saveLead({ entry, value, message, body }) {
   console.log("LEAD_CRIADO", waId, referral.ctwa_clid || "sem_ctwa_clid");
 }
 
+function extractLandingRef(messageText) {
+  const match = String(messageText || "").match(/\bAURON-([A-Za-z0-9_-]{8,64})\b/i);
+  return match?.[1] || null;
+}
+
+function cleanLandingMessage(messageText) {
+  return String(messageText || "")
+    .replace(/\s*Ref:\s*AURON-[A-Za-z0-9_-]{8,64}\s*$/i, "")
+    .trim();
+}
+
+async function getLandingAttribution(ref) {
+  if (!ref) return null;
+
+  const query = new URLSearchParams({
+    waba_id: "eq.landing_attribution",
+    wa_id: `eq.lp:${ref}`,
+    select: "raw_payload,source_url,headline,data_primeira_mensagem",
+    limit: "1",
+  });
+
+  const rows = await supabaseRequest(`leads?${query.toString()}`, {
+    method: "GET",
+  });
+
+  const row = rows?.[0];
+  if (!row) return null;
+
+  const raw = row.raw_payload && typeof row.raw_payload === "object"
+    ? row.raw_payload
+    : {};
+
+  return {
+    ref,
+    ...raw,
+    page_url: raw.page_url || row.source_url || null,
+    utm_campaign: raw.utm_campaign || row.headline || null,
+  };
+}
+
+function buildLandingMetaSourceUrl(attribution) {
+  if (!attribution) return null;
+
+  try {
+    const url = new URL(attribution.page_url || "https://www.auronmarketing.com.br/");
+    const internalFields = {
+      _auron_ref: attribution.ref,
+      _auron_fbc: attribution.fbc,
+      _auron_fbp: attribution.fbp,
+      _auron_ip: attribution.client_ip_address,
+      _auron_ua: attribution.client_user_agent,
+      _auron_utm_source: attribution.utm_source,
+      _auron_utm_medium: attribution.utm_medium,
+      _auron_utm_campaign: attribution.utm_campaign,
+      _auron_utm_content: attribution.utm_content,
+      _auron_utm_term: attribution.utm_term,
+    };
+
+    for (const [key, value] of Object.entries(internalFields)) {
+      if (value) url.searchParams.set(key, String(value));
+    }
+
+    return url.toString();
+  } catch {
+    return attribution.page_url || null;
+  }
+}
+
 async function getCrmContext() {
   const companySlug = process.env.CRM_COMPANY_SLUG || "auron-marketing";
 
@@ -235,7 +303,8 @@ async function syncLeadToCrm({ entry, value, message }) {
     .toLowerCase();
 
   const isClickToWhatsAppLead = Boolean(referral.ctwa_clid);
-  const isLandingPageLead = normalizedMessage.includes("vim pelo site");
+  const landingRef = extractLandingRef(messageText);
+  const isLandingPageLead = normalizedMessage.includes("vim pelo site") || Boolean(landingRef);
 
   // O CRM recebe leads vindos de anúncio Click-to-WhatsApp ou da landing page da Auron.
   // Mensagens comuns do WhatsApp continuam fora do CRM.
@@ -256,6 +325,11 @@ async function syncLeadToCrm({ entry, value, message }) {
   const contact = (value?.contacts || []).find((item) => item?.wa_id === waId) || value?.contacts?.[0];
   const externalId = `${wabaId}:${waId}`;
   const timestamp = messageTimestamp(message);
+  const landingAttribution = isLandingPageLead && landingRef
+    ? await getLandingAttribution(landingRef)
+    : null;
+  const landingMetaSourceUrl = buildLandingMetaSourceUrl(landingAttribution);
+  const cleanMessage = isLandingPageLead ? cleanLandingMessage(messageText) : messageText;
 
   const existingQuery = new URLSearchParams({
     company_id: `eq.${company.id}`,
@@ -273,16 +347,24 @@ async function syncLeadToCrm({ entry, value, message }) {
     name: contact?.profile?.name || `WhatsApp ${waId.slice(-4)}`,
     phone: waId,
     source: isLandingPageLead ? "Landing Page" : "Anúncio WhatsApp",
-    campaign: isLandingPageLead ? "Landing Page Auron" : (referral.headline || null),
+    campaign: isLandingPageLead
+      ? (landingAttribution?.utm_campaign || "Landing Page Auron")
+      : (referral.headline || null),
     integration_source: "whatsapp",
     integration_external_id: externalId,
     wa_id: waId,
     waba_id: wabaId,
     ctwa_clid: referral.ctwa_clid || null,
-    meta_source_id: referral.source_id || null,
-    meta_source_url: referral.source_url || null,
-    meta_headline: referral.headline || null,
-    last_message: messageText,
+    meta_source_id: isLandingPageLead
+      ? (landingAttribution?.fbclid || null)
+      : (referral.source_id || null),
+    meta_source_url: isLandingPageLead
+      ? landingMetaSourceUrl
+      : (referral.source_url || null),
+    meta_headline: isLandingPageLead
+      ? (landingAttribution?.utm_content || null)
+      : (referral.headline || null),
+    last_message: cleanMessage,
     last_message_at: timestamp,
   };
 
