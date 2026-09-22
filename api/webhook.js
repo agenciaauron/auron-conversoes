@@ -228,11 +228,19 @@ async function syncLeadToCrm({ entry, value, message }) {
   const wabaId = String(entry?.id || "");
   const waId = String(message?.from || "");
   const referral = message?.referral || {};
+  const messageText = getMessageText(message) || "";
+  const normalizedMessage = messageText
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
-  // O CRM recebe apenas contatos originados de anúncio Click-to-WhatsApp.
-  // Mensagens diretas continuam sendo registradas apenas no Auron Conversões.
-  if (!referral.ctwa_clid || !wabaId || !waId) {
-    return { skipped: true, reason: "sem_ctwa_clid" };
+  const isClickToWhatsAppLead = Boolean(referral.ctwa_clid);
+  const isLandingPageLead = normalizedMessage.includes("vim pelo site");
+
+  // O CRM recebe leads vindos de anúncio Click-to-WhatsApp ou da landing page da Auron.
+  // Mensagens comuns do WhatsApp continuam fora do CRM.
+  if ((!isClickToWhatsAppLead && !isLandingPageLead) || !wabaId || !waId) {
+    return { skipped: true, reason: "origem_nao_elegivel" };
   }
 
   const configuredWaba = String(process.env.CRM_WABA_ID || "").trim();
@@ -264,17 +272,17 @@ async function syncLeadToCrm({ entry, value, message }) {
   const crmData = {
     name: contact?.profile?.name || `WhatsApp ${waId.slice(-4)}`,
     phone: waId,
-    source: "Anúncio WhatsApp",
-    campaign: referral.headline || null,
+    source: isLandingPageLead ? "Landing Page" : "Anúncio WhatsApp",
+    campaign: isLandingPageLead ? "Landing Page Auron" : (referral.headline || null),
     integration_source: "whatsapp",
     integration_external_id: externalId,
     wa_id: waId,
     waba_id: wabaId,
-    ctwa_clid: referral.ctwa_clid,
+    ctwa_clid: referral.ctwa_clid || null,
     meta_source_id: referral.source_id || null,
     meta_source_url: referral.source_url || null,
     meta_headline: referral.headline || null,
-    last_message: getMessageText(message),
+    last_message: messageText,
     last_message_at: timestamp,
   };
 
