@@ -108,6 +108,61 @@ async function getDatasetId(wabaId) {
   return datasetId;
 }
 
+function getWebDatasetId() {
+  return process.env.META_WEB_DATASET_ID || "1126162470085705";
+}
+
+function parseLandingAttribution(sourceUrl) {
+  if (!sourceUrl) return null;
+
+  try {
+    const url = new URL(sourceUrl);
+    const value = (name) => url.searchParams.get(name) || null;
+
+    const attribution = {
+      ref: value("_auron_ref"),
+      fbc: value("_auron_fbc"),
+      fbp: value("_auron_fbp"),
+      client_ip_address: value("_auron_ip"),
+      client_user_agent: value("_auron_ua"),
+      utm_source: value("_auron_utm_source") || value("utm_source"),
+      utm_medium: value("_auron_utm_medium") || value("utm_medium"),
+      utm_campaign: value("_auron_utm_campaign") || value("utm_campaign"),
+      utm_content: value("_auron_utm_content") || value("utm_content"),
+      utm_term: value("_auron_utm_term") || value("utm_term"),
+    };
+
+    [
+      "_auron_ref",
+      "_auron_fbc",
+      "_auron_fbp",
+      "_auron_ip",
+      "_auron_ua",
+      "_auron_utm_source",
+      "_auron_utm_medium",
+      "_auron_utm_campaign",
+      "_auron_utm_content",
+      "_auron_utm_term",
+    ].forEach((key) => url.searchParams.delete(key));
+
+    attribution.event_source_url = url.toString();
+    return attribution;
+  } catch {
+    return null;
+  }
+}
+
+async function sha256(value) {
+  const normalizedValue = String(value || "").trim().toLowerCase();
+  if (!normalizedValue) return null;
+
+  const bytes = new TextEncoder().encode(normalizedValue);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function normalized(value) {
   return String(value || "")
     .normalize("NFD")
@@ -188,7 +243,7 @@ export async function POST(request) {
     const leadQuery = new URLSearchParams({
       id: `eq.${leadId}`,
       company_id: `eq.${company.id}`,
-      select: "id,name,integration_source,waba_id,ctwa_clid,sale_value,stage_id,meta_qualified_sent_at,meta_qualified_event_id,meta_purchase_sent_at,meta_purchase_event_id",
+      select: "id,name,phone,wa_id,source,campaign,integration_source,waba_id,ctwa_clid,meta_source_id,meta_source_url,meta_headline,sale_value,stage_id,meta_qualified_sent_at,meta_qualified_event_id,meta_purchase_sent_at,meta_purchase_event_id",
       limit: "1",
     });
     const leads = await crmRequest(`leads?${leadQuery.toString()}`);
@@ -198,12 +253,23 @@ export async function POST(request) {
       return Response.json({ ok: false, error: "Lead não encontrado" }, { status: 404 });
     }
 
-    if (lead.integration_source !== "whatsapp" || !lead.waba_id || !lead.ctwa_clid) {
+    const landingAttribution = parseLandingAttribution(lead.meta_source_url);
+    const isClickToWhatsAppLead =
+      lead.integration_source === "whatsapp" &&
+      Boolean(lead.waba_id) &&
+      Boolean(lead.ctwa_clid);
+    const isLandingPageLead =
+      lead.integration_source === "whatsapp" &&
+      Boolean(lead.waba_id) &&
+      normalized(lead.source) === "landing page" &&
+      Boolean(landingAttribution);
+
+    if (!isClickToWhatsAppLead && !isLandingPageLead) {
       return Response.json({
         ok: true,
         status: "not_eligible",
         event_name: eventName,
-        message: "Lead sem vínculo Click-to-WhatsApp; nenhum evento foi enviado.",
+        message: "Lead sem vínculo de atribuição com anúncio ou landing page; nenhum evento foi enviado.",
       });
     }
 
@@ -263,21 +329,55 @@ export async function POST(request) {
       });
     }
 
-    const datasetId = await getDatasetId(lead.waba_id);
+    const datasetId = isLandingPageLead
+      ? getWebDatasetId()
+      : await getDatasetId(lead.waba_id);
     const eventId = `auron_crm_${lead.id}_${eventName.toLowerCase()}`;
     const sentAt = new Date().toISOString();
 
-    const event = {
-      event_name: eventName,
-      event_time: Math.floor(Date.now() / 1000),
-      event_id: eventId,
-      action_source: "business_messaging",
-      messaging_channel: "whatsapp",
-      user_data: {
-        whatsapp_business_account_id: lead.waba_id,
-        ctwa_clid: lead.ctwa_clid,
-      },
-    };
+    let event;
+
+    if (isLandingPageLead) {
+      const phone = String(lead.phone || lead.wa_id || "").replace(/\D/g, "");
+      const phoneHash = phone ? await sha256(phone) : null;
+      const externalIdHash = await sha256(String(lead.id));
+
+      const userData = {
+        ...(landingAttribution?.fbc ? { fbc: landingAttribution.fbc } : {}),
+        ...(landingAttribution?.fbp ? { fbp: landingAttribution.fbp } : {}),
+        ...(landingAttribution?.client_ip_address
+          ? { client_ip_address: landingAttribution.client_ip_address }
+          : {}),
+        ...(landingAttribution?.client_user_agent
+          ? { client_user_agent: landingAttribution.client_user_agent }
+          : {}),
+        ...(phoneHash ? { ph: [phoneHash] } : {}),
+        ...(externalIdHash ? { external_id: [externalIdHash] } : {}),
+      };
+
+      event = {
+        event_name: eventName,
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: eventId,
+        action_source: "website",
+        event_source_url:
+          landingAttribution?.event_source_url ||
+          "https://www.auronmarketing.com.br/",
+        user_data: userData,
+      };
+    } else {
+      event = {
+        event_name: eventName,
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: eventId,
+        action_source: "business_messaging",
+        messaging_channel: "whatsapp",
+        user_data: {
+          whatsapp_business_account_id: lead.waba_id,
+          ctwa_clid: lead.ctwa_clid,
+        },
+      };
+    }
 
     if (eventName === "Purchase") {
       event.custom_data = {
