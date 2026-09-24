@@ -656,8 +656,8 @@ src="https://www.facebook.com/tr?id=1126162470085705&ev=PageView&noscript=1"
     try {
       const url = new URL(href, window.location.href);
       let message = url.searchParams.get('text') || 'Olá, vim pelo site e gostaria de saber mais sobre a Auron.';
-      message = message.replace(/\s*Ref:\s*AURON-[A-Za-z0-9_-]+\s*$/i, '').trim();
-      url.searchParams.set('text', message + ' Ref: AURON-' + ref);
+      message = message.replace(/\s*(?:Ref:|C[oó]digo de atendimento:)\s*AURON-[A-Za-z0-9_-]+\s*$/i, '').trim();
+      url.searchParams.set('text', message + '\nCódigo de atendimento: AURON-' + ref);
       return url.toString();
     } catch {
       return href;
