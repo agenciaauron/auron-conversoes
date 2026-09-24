@@ -180,7 +180,7 @@ function extractLandingRef(messageText) {
 
 function cleanLandingMessage(messageText) {
   return String(messageText || "")
-    .replace(/\s*Ref:\s*AURON-[A-Za-z0-9_-]{8,64}\s*$/i, "")
+    .replace(/\s*(?:Ref:|C[oó]digo de atendimento:)\s*AURON-[A-Za-z0-9_-]{8,64}\s*$/i, "")
     .trim();
 }
 
