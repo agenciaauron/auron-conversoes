@@ -281,7 +281,7 @@ export async function POST(request) {
     const stageQuery = new URLSearchParams({
       id: `eq.${lead.stage_id}`,
       company_id: `eq.${company.id}`,
-      select: "id,name,is_won",
+      select: "id,name,is_won,is_lost",
       limit: "1",
     });
     const stages = await crmRequest(`pipeline_stages?${stageQuery.toString()}`);
@@ -291,7 +291,8 @@ export async function POST(request) {
       return Response.json({ ok: false, error: "Etapa atual do lead não encontrada" }, { status: 400 });
     }
 
-    if (eventName === "QualifiedLead" && !normalized(stage.name).includes("qualific")) {
+    // "Desqualificado" também contém "qualific": etapas de perda nunca contam como qualificado.
+    if (eventName === "QualifiedLead" && (stage.is_lost || !normalized(stage.name).includes("qualific"))) {
       return Response.json({ ok: false, error: "O lead não está na etapa Qualificado" }, { status: 400 });
     }
 
