@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /painel
+Disallow: /crm-check
+Disallow: /dataset-check
+Disallow: /subscribe-waba
+Disallow: /whatsapp-callback
+
+Sitemap: https://www.auronmarketing.com.br/sitemap.xml
