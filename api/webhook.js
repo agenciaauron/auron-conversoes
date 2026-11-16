@@ -312,8 +312,13 @@ async function syncLeadToCrm({ entry, value, message }) {
     return { skipped: true, reason: "origem_nao_elegivel" };
   }
 
-  const configuredWaba = String(process.env.CRM_WABA_ID || "").trim();
-  if (configuredWaba && configuredWaba !== wabaId) {
+  // CRM_WABA_ID aceita uma ou mais contas do WhatsApp separadas por vírgula
+  // (ex.: número da Auron e número do SDR). Vazio = aceita qualquer conta.
+  const configuredWabas = String(process.env.CRM_WABA_ID || "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  if (configuredWabas.length && !configuredWabas.includes(wabaId)) {
     return { skipped: true, reason: "waba_nao_configurada" };
   }
 

@@ -39,7 +39,11 @@ export async function POST(request) {
 
   try {
     const companySlug = process.env.CRM_COMPANY_SLUG || "auron-marketing";
-    const configuredWaba = process.env.CRM_WABA_ID || null;
+    const configuredWabas = String(process.env.CRM_WABA_ID || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+    const configuredWaba = configuredWabas.length ? configuredWabas.join(",") : null;
 
     const companyParams = new URLSearchParams({
       slug: `eq.${companySlug}`,

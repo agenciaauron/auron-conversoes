@@ -273,9 +273,13 @@ export async function POST(request) {
       });
     }
 
-    const expectedWaba = process.env.CRM_WABA_ID;
-    if (expectedWaba && String(lead.waba_id) !== String(expectedWaba)) {
-      return Response.json({ ok: false, error: "WABA do lead não corresponde à WABA configurada" }, { status: 400 });
+    // CRM_WABA_ID aceita uma ou mais contas do WhatsApp separadas por vírgula.
+    const expectedWabas = String(process.env.CRM_WABA_ID || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+    if (expectedWabas.length && !expectedWabas.includes(String(lead.waba_id))) {
+      return Response.json({ ok: false, error: "WABA do lead não está entre as WABAs configuradas" }, { status: 400 });
     }
 
     const stageQuery = new URLSearchParams({
