@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Conectar WhatsApp | Auron Conversões</title>
+  <style>
+    :root{--purple:#541285;--bg:#f6f5f8;--card:#fff;--text:#17151a;--muted:#716b78;--border:#e8e4eb;--green:#16794b;--red:#b42318}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(560px,100%);background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px;box-shadow:0 18px 60px rgba(0,0,0,.08)}.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;margin-bottom:24px}.mark{width:36px;height:36px;border-radius:10px;background:var(--purple);color:#fff;display:grid;place-items:center;font-weight:900}h1{font-size:25px;margin:0 0 8px}p{color:var(--muted);line-height:1.55;margin:0 0 14px}ol{color:var(--muted);line-height:1.6;padding-left:20px;margin:0 0 18px}.btn{width:100%;margin-top:8px;border:0;border-radius:10px;padding:13px 15px;background:var(--purple);color:#fff;font-weight:800;font-size:15px;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}.status{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.5}.ok{color:var(--green)}.error{color:var(--red)}code{font-size:14px;font-weight:700;color:var(--text)}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand"><div class="mark">A</div>Auron Conversões</div>
+    <h1>Conectar WhatsApp Business</h1>
+    <p>Conecta um número que já usa o app WhatsApp Business no celular ao Auron Conversões, sem tirar o número do celular.</p>
+    <ol>
+      <li>Clique no botão e entre com o Facebook.</li>
+      <li>Escolha o portfólio empresarial e crie a conta do WhatsApp.</li>
+      <li>Escolha conectar o WhatsApp Business que já está no celular e leia o QR code no app.</li>
+    </ol>
+    <button id="connect" class="btn" disabled>Carregando...</button>
+    <div id="status" class="status">Aguardando.</div>
+  </main>
+<script>
+const APP_ID='1666136947785189';
+const CONFIG_ID='2427482198073695';
+const button=document.getElementById('connect');
+const statusBox=document.getElementById('status');
+const result={};
+
+function show(text,kind){
+  statusBox.className='status'+(kind?' '+kind:'');
+  statusBox.textContent=text;
+}
+
+function summary(){
+  const lines=[];
+  if(result.event) lines.push('Etapa final: '+result.event);
+  if(result.waba_id) lines.push('ID da conta do WhatsApp (WABA): '+result.waba_id);
+  if(result.phone_number_id) lines.push('ID do número: '+result.phone_number_id);
+  if(result.business_id) lines.push('ID do portfólio: '+result.business_id);
+  if(result.authorized) lines.push('Autorização da Meta recebida.');
+  return lines.join('\n');
+}
+
+// A Meta avisa o resultado do cadastro por mensagem da janela pop-up.
+window.addEventListener('message',(event)=>{
+  if(!/(^|\.)facebook\.com$/.test(new URL(event.origin).hostname)) return;
+  let data;
+  try{ data=JSON.parse(event.data); }catch{ return; }
+  if(!data||data.type!=='WA_EMBEDDED_SIGNUP') return;
+  console.log('WA_EMBEDDED_SIGNUP',data);
+  if(data.event==='CANCEL'){
+    const step=data.data?.current_step?' (parou em: '+data.data.current_step+')':'';
+    const err=data.data?.error_message?'\n'+data.data.error_message:'';
+    show('Cadastro cancelado'+step+err,'error');
+    return;
+  }
+  if(data.event==='ERROR'){
+    show('A Meta retornou um erro:\n'+(data.data?.error_message||JSON.stringify(data.data)),'error');
+    return;
+  }
+  Object.assign(result,{event:data.event},data.data||{});
+  show('Cadastro concluído.\n'+summary()+'\n\nEnvie um print desta tela para configurar o restante.','ok');
+});
+
+window.fbAsyncInit=function(){
+  FB.init({appId:APP_ID,autoLogAppEvents:true,xfbml:false,version:'v23.0'});
+  button.disabled=false;
+  button.textContent='Conectar WhatsApp';
+};
+
+button.onclick=()=>{
+  show('Janela da Meta aberta. Siga os passos por lá.');
+  FB.login((response)=>{
+    if(response.authResponse?.code){
+      result.authorized=true;
+      if(!result.waba_id) show('Autorização recebida. Aguardando os dados da conta...\n'+summary(),'ok');
+      else show('Cadastro concluído.\n'+summary()+'\n\nEnvie um print desta tela para configurar o restante.','ok');
+    }else if(!result.waba_id){
+      show('A janela foi fechada sem concluir o cadastro.','error');
+    }
+  },{
+    config_id:CONFIG_ID,
+    response_type:'code',
+    override_default_response_type:true,
+    extras:{setup:{},featureType:'whatsapp_business_app_onboarding',sessionInfoVersion:'3'}
+  });
+};
+</script>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js"></script>
+</body>
+</html>
