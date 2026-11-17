@@ -292,6 +292,27 @@ async function getCrmContext() {
   };
 }
 
+// Textos pré-preenchidos dos anúncios da Auron (sem acento, minúsculo).
+// Às vezes o WhatsApp entrega a mensagem do anúncio SEM a marca do anúncio (referral/ctwa_clid),
+// por exemplo quando a pessoa clica pelo computador. Quem chega com um desses textos também é lead de anúncio.
+// Dá para acrescentar outros em AD_MESSAGE_PATTERNS (separados por "|").
+const DEFAULT_AD_MESSAGE_PATTERNS = [
+  "tenho uma empresa de limpeza de pisos",
+  "quero atrair mais clientes",
+  "tenho interesse e queria mais informacoes",
+];
+
+function adMessagePatterns() {
+  const extra = String(process.env.AD_MESSAGE_PATTERNS || "")
+    .split("|")
+    .map((item) => item.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim())
+    .filter(Boolean);
+  return [...DEFAULT_AD_MESSAGE_PATTERNS, ...extra];
+}
+
+// Origem gravada no CRM para lead de anúncio que chegou sem a marca do anúncio.
+const AD_WITHOUT_REFERRAL_SOURCE = "Anúncio WhatsApp (sem identificação)";
+
 async function syncLeadToCrm({ entry, value, message }) {
   const wabaId = String(entry?.id || "");
   const waId = String(message?.from || "");
@@ -305,10 +326,14 @@ async function syncLeadToCrm({ entry, value, message }) {
   const isClickToWhatsAppLead = Boolean(referral.ctwa_clid);
   const landingRef = extractLandingRef(messageText);
   const isLandingPageLead = normalizedMessage.includes("vim pelo site") || Boolean(landingRef);
+  const isAdTextLead =
+    !isClickToWhatsAppLead &&
+    !isLandingPageLead &&
+    adMessagePatterns().some((pattern) => normalizedMessage.includes(pattern));
 
-  // O CRM recebe leads vindos de anúncio Click-to-WhatsApp ou da landing page da Auron.
-  // Mensagens comuns do WhatsApp continuam fora do CRM.
-  if ((!isClickToWhatsAppLead && !isLandingPageLead) || !wabaId || !waId) {
+  // O CRM recebe leads vindos de anúncio Click-to-WhatsApp (com ou sem a marca do anúncio)
+  // ou da landing page da Auron. Mensagens comuns do WhatsApp continuam fora do CRM.
+  if ((!isClickToWhatsAppLead && !isLandingPageLead && !isAdTextLead) || !wabaId || !waId) {
     return { skipped: true, reason: "origem_nao_elegivel" };
   }
 
@@ -351,7 +376,11 @@ async function syncLeadToCrm({ entry, value, message }) {
   const crmData = {
     name: contact?.profile?.name || `WhatsApp ${waId.slice(-4)}`,
     phone: waId,
-    source: isLandingPageLead ? "Landing Page" : "Anúncio WhatsApp",
+    source: isLandingPageLead
+      ? "Landing Page"
+      : isAdTextLead
+        ? AD_WITHOUT_REFERRAL_SOURCE
+        : "Anúncio WhatsApp",
     campaign: isLandingPageLead
       ? (landingAttribution?.utm_campaign || "Landing Page Auron")
       : (referral.headline || null),
@@ -374,10 +403,16 @@ async function syncLeadToCrm({ entry, value, message }) {
   };
 
   if (existing?.length) {
+    // Lead que já está no CRM e repete o texto do anúncio sem a marca: só atualiza a mensagem,
+    // para não apagar a origem/atribuição que ele já tem.
+    const updateData = isAdTextLead
+      ? { last_message: crmData.last_message, last_message_at: crmData.last_message_at }
+      : crmData;
+
     await crmSupabaseRequest(`leads?id=eq.${encodeURIComponent(existing[0].id)}`, {
       method: "PATCH",
       headers: { Prefer: "return=minimal" },
-      body: JSON.stringify(crmData),
+      body: JSON.stringify(updateData),
     });
 
     console.log("CRM_LEAD_ATUALIZADO", { wa_id: waId, lead_id: existing[0].id });

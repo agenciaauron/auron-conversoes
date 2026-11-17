@@ -264,7 +264,16 @@ export async function POST(request) {
       normalized(lead.source) === "landing page" &&
       Boolean(landingAttribution);
 
-    if (!isClickToWhatsAppLead && !isLandingPageLead) {
+    // Lead de anúncio que chegou sem a marca do anúncio (o webhook grava essa origem):
+    // vai para o Pixel identificado só pelo telefone, e a Meta tenta ligar ao anúncio.
+    const isAdWithoutReferralLead =
+      lead.integration_source === "whatsapp" &&
+      Boolean(lead.waba_id) &&
+      !lead.ctwa_clid &&
+      normalized(lead.source).startsWith("anuncio whatsapp (sem identificacao)") &&
+      Boolean(String(lead.phone || lead.wa_id || "").replace(/\D/g, ""));
+
+    if (!isClickToWhatsAppLead && !isLandingPageLead && !isAdWithoutReferralLead) {
       return Response.json({
         ok: true,
         status: "not_eligible",
@@ -334,7 +343,7 @@ export async function POST(request) {
       });
     }
 
-    const datasetId = isLandingPageLead
+    const datasetId = isLandingPageLead || isAdWithoutReferralLead
       ? getWebDatasetId()
       : await getDatasetId(lead.waba_id);
     const eventId = `auron_crm_${lead.id}_${eventName.toLowerCase()}`;
@@ -369,6 +378,21 @@ export async function POST(request) {
           landingAttribution?.event_source_url ||
           "https://www.auronmarketing.com.br/",
         user_data: userData,
+      };
+    } else if (isAdWithoutReferralLead) {
+      // Sem marca do anúncio: a Meta reconhece a pessoa pelo telefone (criptografado).
+      const phone = String(lead.phone || lead.wa_id || "").replace(/\D/g, "");
+
+      event = {
+        event_name: eventName,
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: eventId,
+        action_source: "chat",
+        user_data: {
+          ph: [await sha256(phone)],
+          external_id: [await sha256(String(lead.id))],
+          country: [await sha256("br")],
+        },
       };
     } else {
       event = {
