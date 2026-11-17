@@ -313,6 +313,66 @@ function adMessagePatterns() {
 // Origem gravada no CRM para lead de anúncio que chegou sem a marca do anúncio.
 const AD_WITHOUT_REFERRAL_SOURCE = "Anúncio WhatsApp (sem identificação)";
 
+async function findCrmStages(companyId, slugs) {
+  const query = new URLSearchParams({
+    company_id: `eq.${companyId}`,
+    slug: `in.(${slugs.join(",")})`,
+    select: "id,slug",
+  });
+  const rows = await crmSupabaseRequest(`pipeline_stages?${query.toString()}`, { method: "GET" });
+  return Object.fromEntries((rows || []).map((row) => [row.slug, row.id]));
+}
+
+// Lead em "Sem resposta" que voltou a falar volta sozinho para "Em contato".
+async function reactivateIfNoReply(companyId, lead) {
+  if (!lead?.stage_id) return false;
+
+  const stages = await findCrmStages(companyId, ["sem-resposta", "em-contato"]);
+  if (!stages["sem-resposta"] || !stages["em-contato"] || lead.stage_id !== stages["sem-resposta"]) {
+    return false;
+  }
+
+  await crmSupabaseRequest(`leads?id=eq.${encodeURIComponent(lead.id)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ stage_id: stages["em-contato"], updated_at: new Date().toISOString() }),
+  });
+
+  console.log("CRM_LEAD_VOLTOU_A_RESPONDER", { lead_id: lead.id });
+  return true;
+}
+
+// Mensagem comum (sem anúncio/site) de quem já é lead no CRM: atualiza a última mensagem.
+async function updateExistingCrmLead({ wabaId, waId, message, messageText }) {
+  const { company } = await getCrmContext();
+
+  const existingQuery = new URLSearchParams({
+    company_id: `eq.${company.id}`,
+    integration_source: "eq.whatsapp",
+    integration_external_id: `eq.${wabaId}:${waId}`,
+    select: "id,stage_id",
+    limit: "1",
+  });
+  const existing = await crmSupabaseRequest(`leads?${existingQuery.toString()}`, { method: "GET" });
+  const lead = existing?.[0];
+
+  if (!lead) {
+    return { skipped: true, reason: "origem_nao_elegivel" };
+  }
+
+  await crmSupabaseRequest(`leads?id=eq.${encodeURIComponent(lead.id)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({
+      last_message: messageText || null,
+      last_message_at: messageTimestamp(message),
+    }),
+  });
+
+  const reactivated = await reactivateIfNoReply(company.id, lead);
+  return { synced: true, created: false, leadId: lead.id, reactivated };
+}
+
 async function syncLeadToCrm({ entry, value, message }) {
   const wabaId = String(entry?.id || "");
   const waId = String(message?.from || "");
@@ -331,9 +391,7 @@ async function syncLeadToCrm({ entry, value, message }) {
     !isLandingPageLead &&
     adMessagePatterns().some((pattern) => normalizedMessage.includes(pattern));
 
-  // O CRM recebe leads vindos de anúncio Click-to-WhatsApp (com ou sem a marca do anúncio)
-  // ou da landing page da Auron. Mensagens comuns do WhatsApp continuam fora do CRM.
-  if ((!isClickToWhatsAppLead && !isLandingPageLead && !isAdTextLead) || !wabaId || !waId) {
+  if (!wabaId || !waId) {
     return { skipped: true, reason: "origem_nao_elegivel" };
   }
 
@@ -349,6 +407,13 @@ async function syncLeadToCrm({ entry, value, message }) {
 
   if (!process.env.CRM_SUPABASE_URL || !process.env.CRM_SUPABASE_SECRET_KEY) {
     return { skipped: true, reason: "crm_nao_configurado" };
+  }
+
+  // O CRM só CRIA leads vindos de anúncio Click-to-WhatsApp (com ou sem a marca do anúncio)
+  // ou da landing page da Auron. Mensagens comuns de quem já é lead no CRM só atualizam
+  // a última mensagem (e tiram o lead de "Sem resposta"); as demais ficam fora do CRM.
+  if (!isClickToWhatsAppLead && !isLandingPageLead && !isAdTextLead) {
+    return updateExistingCrmLead({ wabaId, waId, message, messageText });
   }
 
   const { company, firstStage, assignedTo } = await getCrmContext();
@@ -414,6 +479,7 @@ async function syncLeadToCrm({ entry, value, message }) {
       headers: { Prefer: "return=minimal" },
       body: JSON.stringify(updateData),
     });
+    await reactivateIfNoReply(company.id, existing[0]);
 
     console.log("CRM_LEAD_ATUALIZADO", { wa_id: waId, lead_id: existing[0].id });
     return { synced: true, created: false, leadId: existing[0].id };
