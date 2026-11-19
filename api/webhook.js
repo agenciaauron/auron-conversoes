@@ -323,22 +323,39 @@ async function findCrmStages(companyId, slugs) {
   return Object.fromEntries((rows || []).map((row) => [row.slug, row.id]));
 }
 
-// Lead em "Sem resposta" que voltou a falar volta sozinho para "Em contato".
+// Lead que voltou a falar volta sozinho para "Em conversa" (slug em-contato) quando estava:
+//   * em "Sem resposta" (etapa antiga, arquivada em 19/11/2026), ou
+//   * em Desqualificado com o motivo "Não respondeu" (inclusive o automático das 9h).
 async function reactivateIfNoReply(companyId, lead) {
-  if (!lead?.stage_id) return false;
+  if (!lead?.id) return false;
 
-  const stages = await findCrmStages(companyId, ["sem-resposta", "em-contato"]);
-  if (!stages["sem-resposta"] || !stages["em-contato"] || lead.stage_id !== stages["sem-resposta"]) {
-    return false;
-  }
+  const current = await crmSupabaseRequest(
+    `leads?id=eq.${encodeURIComponent(lead.id)}&select=stage_id,lost_reason&limit=1`,
+    { method: "GET" }
+  );
+  const row = current?.[0];
+  if (!row?.stage_id) return false;
+
+  const stages = await findCrmStages(companyId, ["sem-resposta", "em-contato", "desqualificado"]);
+  if (!stages["em-contato"]) return false;
+
+  const wasNoReply = row.stage_id === stages["sem-resposta"];
+  const wasGivenUp = row.stage_id === stages["desqualificado"] && row.lost_reason === "Não respondeu";
+  if (!wasNoReply && !wasGivenUp) return false;
 
   await crmSupabaseRequest(`leads?id=eq.${encodeURIComponent(lead.id)}`, {
     method: "PATCH",
     headers: { Prefer: "return=minimal" },
-    body: JSON.stringify({ stage_id: stages["em-contato"], no_reply_tag: null, updated_at: new Date().toISOString() }),
+    body: JSON.stringify({
+      stage_id: stages["em-contato"],
+      lost_reason: null,
+      lost_at: null,
+      no_reply_tag: null,
+      updated_at: new Date().toISOString(),
+    }),
   });
 
-  console.log("CRM_LEAD_VOLTOU_A_RESPONDER", { lead_id: lead.id });
+  console.log("CRM_LEAD_VOLTOU_A_RESPONDER", { lead_id: lead.id, de: wasNoReply ? "sem-resposta" : "desqualificado" });
   return true;
 }
 
