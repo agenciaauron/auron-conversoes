@@ -325,7 +325,7 @@ async function findCrmStages(companyId, slugs) {
 
 // Lead que voltou a falar volta sozinho para "Em conversa" (slug em-contato) quando estava:
 //   * em "Sem resposta" (etapa antiga, arquivada em 19/11/2026), ou
-//   * em Desqualificado com o motivo "Não respondeu" (inclusive o automático das 9h).
+//   * em Desqualificado com o motivo "Não respondeu" (a equipe desqualificou e ele voltou a falar).
 async function reactivateIfNoReply(companyId, lead) {
   if (!lead?.id) return false;
 
