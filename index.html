@@ -319,7 +319,8 @@ html.lenis,html.lenis body{height:auto}
 .tm-chips{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .tm-chips li{font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid rgba(236,230,255,.12);color:var(--mute);transition:border-color .5s,color .5s}
 .tm:hover .tm-chips li{border-color:rgba(201,169,255,.35);color:var(--fg)}
-@media (max-width:900px){.tm-grid{grid-template-columns:minmax(0,1fr);max-width:560px}}
+.tm-grid>.tm:nth-child(3):last-child{grid-column:1/-1;justify-self:center;width:calc(50% - 12px)}
+@media (max-width:900px){.tm-grid{grid-template-columns:minmax(0,1fr);max-width:560px}.tm-grid>.tm:nth-child(3):last-child{width:auto;justify-self:stretch}}
 @media (max-width:520px){.tm{grid-template-columns:minmax(0,1fr)}.tm-photo{min-height:0;max-height:none;aspect-ratio:1/1}.tm-photo::after{background:linear-gradient(0deg,rgba(13,11,19,.55) 0%,transparent 30%)}}
 
 
@@ -1059,7 +1060,7 @@ footer{border-top:1px solid var(--line);padding-block:48px calc(40px + env(safe-
     <div class="proc-head">
       <div class="eyebrow rv">Quem faz</div>
       <h2 class="split" id="teamTitle"><span class="hw">Quem</span> <span class="hw">está</span> <span class="hw">por</span> <span class="hw">trás</span> <span class="soft"><span class="hw">da</span> <span class="hw">Auron</span></span></h2>
-      <p class="lead rv">Sem intermediário. Do primeiro contato à campanha rodando, você fala direto com os sócios.</p>
+      <p class="lead rv">Sem intermediário. Do primeiro contato à campanha rodando, você fala direto com o time da Auron.</p>
     </div>
     <div class="tm-grid">
       <article class="tm rv">
@@ -1078,6 +1079,15 @@ footer{border-top:1px solid var(--line);padding-block:48px calc(40px + env(safe-
           <h3>Kaic Rainieri</h3>
           <p>Cuida da parte comercial da Auron: do primeiro contato ao alinhamento com cada cliente, entendendo o cenário do negócio para conectar com a solução certa.</p>
           <ul class="tm-chips"><li>Comercial</li><li>Atendimento</li><li>Relacionamento</li></ul>
+        </div>
+      </article>
+      <article class="tm rv">
+        <div class="tm-photo"><img src="/home/miguel-hq.jpg" alt="Miguel Pedro, SDR da Auron"><span class="tm-tag">Primeiro contato</span></div>
+        <div class="tm-body">
+          <span class="tm-role">SDR</span>
+          <h3>Miguel Pedro</h3>
+          <p>É quem recebe você na Auron: responde o primeiro contato, entende o momento do seu negócio e agenda a conversa com os sócios.</p>
+          <ul class="tm-chips"><li>Atendimento</li><li>Prospecção</li><li>Agendamento</li></ul>
         </div>
       </article>
     </div>
