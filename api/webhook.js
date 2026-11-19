@@ -542,7 +542,7 @@ async function registerOutgoingEcho({ entry, echo }) {
     company_id: `eq.${company.id}`,
     integration_source: "eq.whatsapp",
     integration_external_id: `eq.${wabaId}:${waId}`,
-    select: "id,stage_id,created_at,last_message_at",
+    select: "id,stage_id,created_at,last_message_at,meeting_status",
     limit: "1",
   });
   const lead = (await crmSupabaseRequest(`leads?${leadQuery.toString()}`, { method: "GET" }))?.[0];
@@ -590,11 +590,12 @@ async function registerOutgoingEcho({ entry, echo }) {
   const sinceMs = inboundMs || new Date(lead.created_at).getTime();
   const attemptNumber = attempts.filter((item) => new Date(item.created_at).getTime() > sinceMs).length + 1;
   const days = FOLLOW_UP_DAYS[attemptNumber - 1];
-  const update = {
-    next_action_at: days ? new Date(sentMs + days * 86400000).toISOString() : null,
-    next_action_note: days ? `Follow-up ${attemptNumber + 1} de ${NO_REPLY_ATTEMPT_LIMIT}` : null,
-    updated_at: new Date().toISOString(),
-  };
+  const update = { updated_at: new Date().toISOString() };
+  // Com reunião agendada a mensagem é combinado/confirmação, não follow-up: não mexe no próximo contato.
+  if (lead.meeting_status !== "agendada") {
+    update.next_action_at = days ? new Date(sentMs + days * 86400000).toISOString() : null;
+    update.next_action_note = days ? `Follow-up ${attemptNumber + 1} de ${NO_REPLY_ATTEMPT_LIMIT}` : null;
+  }
 
   // Primeiro contato: sai de "Novo lead" e vai para "Em conversa".
   const conversation = stages.find((item) => item.slug === "em-contato");
