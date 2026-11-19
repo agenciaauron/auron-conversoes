@@ -520,6 +520,96 @@ async function syncLeadToCrm({ entry, value, message }) {
   return { synced: true, created: true, leadId };
 }
 
+// ---------------------------------------------------------------------------
+// Mensagens que o SDR manda pelo app WhatsApp Business (modo coexistência).
+// A Meta avisa pelo campo "smb_message_echoes". Cada envio vira uma tentativa no CRM
+// ("Mandou mensagem"), para o selo do funil saber de quem é a vez sem ninguém clicar.
+// Várias mensagens seguidas contam como UMA tentativa: só conta a primeira depois de o
+// lead falar, ou a primeira depois de 12h da tentativa anterior.
+const ECHO_NEW_ROUND_MS = 12 * 3600000;
+const ATTEMPT_TYPES = ["mensagem", "ligacao", "nao_atendeu"];
+const FOLLOW_UP_DAYS = [1, 2, 4];
+const NO_REPLY_ATTEMPT_LIMIT = 4;
+
+async function registerOutgoingEcho({ entry, echo }) {
+  const wabaId = String(entry?.id || "");
+  const waId = String(echo?.to || "");
+  if (!wabaId || !waId) return { skipped: true, reason: "eco_sem_destino" };
+
+  const { company } = await getCrmContext();
+
+  const leadQuery = new URLSearchParams({
+    company_id: `eq.${company.id}`,
+    integration_source: "eq.whatsapp",
+    integration_external_id: `eq.${wabaId}:${waId}`,
+    select: "id,stage_id,created_at,last_message_at",
+    limit: "1",
+  });
+  const lead = (await crmSupabaseRequest(`leads?${leadQuery.toString()}`, { method: "GET" }))?.[0];
+  if (!lead) return { skipped: true, reason: "eco_sem_lead" };
+
+  const stagesQuery = new URLSearchParams({
+    company_id: `eq.${company.id}`,
+    select: "id,slug,is_won,is_lost",
+  });
+  const stages = (await crmSupabaseRequest(`pipeline_stages?${stagesQuery.toString()}`, { method: "GET" })) || [];
+  const stage = stages.find((item) => item.id === lead.stage_id);
+  if (!stage || stage.is_won || stage.is_lost) return { skipped: true, reason: "eco_lead_fora_do_funil" };
+
+  const sentAt = messageTimestamp(echo);
+  const sentMs = new Date(sentAt).getTime();
+
+  const actsQuery = new URLSearchParams({
+    lead_id: `eq.${lead.id}`,
+    type: `in.(${ATTEMPT_TYPES.join(",")})`,
+    select: "created_at",
+    order: "created_at.desc",
+    limit: "50",
+  });
+  const attempts = (await crmSupabaseRequest(`lead_activities?${actsQuery.toString()}`, { method: "GET" })) || [];
+  const lastAttemptMs = attempts[0] ? new Date(attempts[0].created_at).getTime() : 0;
+  const inboundMs = lead.last_message_at ? new Date(lead.last_message_at).getTime() : 0;
+
+  const newRound = !lastAttemptMs || inboundMs > lastAttemptMs || sentMs - lastAttemptMs >= ECHO_NEW_ROUND_MS;
+  if (!newRound) return { skipped: true, reason: "eco_mesma_rodada", leadId: lead.id };
+
+  await crmSupabaseRequest("lead_activities", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({
+      company_id: company.id,
+      lead_id: lead.id,
+      user_id: null,
+      type: "mensagem",
+      note: "Enviada pelo WhatsApp (registrada sozinha)",
+      created_at: sentAt,
+    }),
+  });
+
+  // Mesma cadência do CRM: tentativa 1 -> +1 dia, 2 -> +2 dias, 3 -> +4 dias, 4 -> sem próximo.
+  const sinceMs = inboundMs || new Date(lead.created_at).getTime();
+  const attemptNumber = attempts.filter((item) => new Date(item.created_at).getTime() > sinceMs).length + 1;
+  const days = FOLLOW_UP_DAYS[attemptNumber - 1];
+  const update = {
+    next_action_at: days ? new Date(sentMs + days * 86400000).toISOString() : null,
+    next_action_note: days ? `Follow-up ${attemptNumber + 1} de ${NO_REPLY_ATTEMPT_LIMIT}` : null,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Primeiro contato: sai de "Novo lead" e vai para "Em conversa".
+  const conversation = stages.find((item) => item.slug === "em-contato");
+  if (stage.slug === "novo-lead" && conversation) update.stage_id = conversation.id;
+
+  await crmSupabaseRequest(`leads?id=eq.${encodeURIComponent(lead.id)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify(update),
+  });
+
+  console.log("CRM_ECO_REGISTRADO", { lead_id: lead.id, tentativa: attemptNumber, moveu: Boolean(update.stage_id) });
+  return { synced: true, leadId: lead.id };
+}
+
 export async function GET(request) {
   const url = new URL(request.url);
 
@@ -544,6 +634,20 @@ export async function POST(request) {
 
     for (const entry of body?.entry || []) {
       for (const change of entry?.changes || []) {
+        if (change?.field === "smb_message_echoes") {
+          const echoes = change?.value?.message_echoes || [];
+          console.log("WEBHOOK_ECOS", { waba_id: entry?.id, total: echoes.length });
+          for (const echo of echoes) {
+            try {
+              const echoResult = await registerOutgoingEcho({ entry, echo });
+              if (echoResult?.skipped) console.log("CRM_ECO_IGNORADO", echoResult.reason);
+            } catch (echoError) {
+              console.error("CRM_ECO_ERRO", echoError?.message || echoError);
+            }
+          }
+          continue;
+        }
+
         if (change?.field !== "messages") continue;
 
         const value = change?.value || {};
