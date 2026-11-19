@@ -528,8 +528,9 @@ async function syncLeadToCrm({ entry, value, message }) {
 // lead falar, ou a primeira depois de 12h da tentativa anterior.
 const ECHO_NEW_ROUND_MS = 12 * 3600000;
 const ATTEMPT_TYPES = ["mensagem", "ligacao", "nao_atendeu"];
-const FOLLOW_UP_DAYS = [1, 2, 4];
-const NO_REPLY_ATTEMPT_LIMIT = 4;
+const FOLLOW_UP_DAYS = [1, 2, 4, 7];
+// A contagem de tentativas começou do zero aqui (igual ao CRM e à função do banco).
+const ATTEMPTS_COUNTED_FROM = "2026-11-19T18:30:00.000Z";
 
 async function registerOutgoingEcho({ entry, echo }) {
   const wabaId = String(entry?.id || "");
@@ -586,15 +587,15 @@ async function registerOutgoingEcho({ entry, echo }) {
     }),
   });
 
-  // Mesma cadência do CRM: tentativa 1 -> +1 dia, 2 -> +2 dias, 3 -> +4 dias, 4 -> sem próximo.
-  const sinceMs = inboundMs || new Date(lead.created_at).getTime();
+  // Mesma cadência do CRM: tentativa 1 -> +1 dia, 2 -> +2, 3 -> +4, 4 -> +7, 5 -> sem próximo.
+  const sinceMs = Math.max(inboundMs || new Date(lead.created_at).getTime(), new Date(ATTEMPTS_COUNTED_FROM).getTime());
   const attemptNumber = attempts.filter((item) => new Date(item.created_at).getTime() > sinceMs).length + 1;
   const days = FOLLOW_UP_DAYS[attemptNumber - 1];
   const update = { updated_at: new Date().toISOString() };
   // Com reunião agendada a mensagem é combinado/confirmação, não follow-up: não mexe no próximo contato.
   if (lead.meeting_status !== "agendada") {
     update.next_action_at = days ? new Date(sentMs + days * 86400000).toISOString() : null;
-    update.next_action_note = days ? `Follow-up ${attemptNumber + 1} de ${NO_REPLY_ATTEMPT_LIMIT}` : null;
+    update.next_action_note = days ? "Cobrar se não responder" : null;
   }
 
   // Primeiro contato: sai de "Novo lead" e vai para "Em conversa".
