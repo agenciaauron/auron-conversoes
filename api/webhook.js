@@ -335,7 +335,7 @@ async function reactivateIfNoReply(companyId, lead) {
   await crmSupabaseRequest(`leads?id=eq.${encodeURIComponent(lead.id)}`, {
     method: "PATCH",
     headers: { Prefer: "return=minimal" },
-    body: JSON.stringify({ stage_id: stages["em-contato"], updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ stage_id: stages["em-contato"], no_reply_tag: null, updated_at: new Date().toISOString() }),
   });
 
   console.log("CRM_LEAD_VOLTOU_A_RESPONDER", { lead_id: lead.id });
